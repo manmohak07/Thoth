@@ -40,6 +40,7 @@ class LLMClient:
     async def chat_completion(
         self,
         messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
         stream: bool = True,
     ) -> AsyncGenerator[StreamEvent, None]:
         
@@ -52,6 +53,9 @@ class LLMClient:
             'messages': messages,
             'stream': stream,
         }
+
+        if tools:
+            kwargs['tools'] = tools
         
         for attempt in range(max + 1):
             try:
@@ -95,9 +99,25 @@ class LLMClient:
                         error=f"Connection error -> {e}",
                     )
                     return
-            
 
-            
+    def build_tools(self, tools: list[dict[str, Any]]):
+        return [
+            {
+                'type': 'function',
+                'function': {
+                    'name': tool['name'],
+                    'description': tool['description', ''],
+                    'parameters': tool.get(
+                        'parameters',
+                        {
+                            'type': 'object',
+                            'properties': {},
+                        },
+                    ),
+                },
+            }
+            for tool in tools
+        ]
     
     async def _stream_response(
         self,

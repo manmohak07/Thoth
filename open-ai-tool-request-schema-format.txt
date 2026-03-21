@@ -1,0 +1,17 @@
+{
+  "type": "function",
+  "function": {
+    "name": "function_name",
+    "description": "Clear description of what the tool does",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "parameter_name": {
+          "type": "string",
+          "description": "Description of the parameter"
+        }
+      },
+      "required": ["parameter_name"]
+    }
+  }
+}
