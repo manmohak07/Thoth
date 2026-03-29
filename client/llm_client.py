@@ -55,7 +55,8 @@ class LLMClient:
         }
 
         if tools:
-            kwargs['tools'] = tools
+            kwargs['tools'] = self.build_tools(tools)
+            kwargs['tool_choice'] = 'auto'
         
         for attempt in range(max + 1):
             try:
@@ -106,7 +107,7 @@ class LLMClient:
                 'type': 'function',
                 'function': {
                     'name': tool['name'],
-                    'description': tool['description', ''],
+                    'description': tool.get('description', ''),
                     'parameters': tool.get(
                         'parameters',
                         {
@@ -163,6 +164,8 @@ class LLMClient:
                     type=StreamEventType.TEXT_DELTA,
                     text_delta=TextDelta(delta.content),
                 )
+            
+            print(delta.tool_calls)
         
         yield StreamEvent(
             type=StreamEventType.MESSAGE_COMPLETE,

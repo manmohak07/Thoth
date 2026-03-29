@@ -40,7 +40,7 @@ class ToolRegistry:
     def get_tools(self) -> list[Tool]:
         tools: list[Tool] = []
 
-        for tool in self._tools.values:
+        for tool in self._tools.values():
             tools.append(tool)
         
         return tools
@@ -85,8 +85,7 @@ class ToolRegistry:
             return ToolResult.error_result(
                 f'Internal error {str(e)}',
                 metadata={
-                    'tool_name',
-                    name,
+                    'tool_name': name,
                 }
             )
 
