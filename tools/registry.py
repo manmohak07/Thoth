@@ -49,8 +49,8 @@ class ToolRegistry:
         self,
         name: str, 
         params: dict[str, Any], 
-        cwd: Path | None
-    ) -> None:
+        cwd: Path
+    ) -> ToolResult:
         
         tool = self.get(name)
         if tool is None:
@@ -78,7 +78,7 @@ class ToolRegistry:
 
         # 1
         try:
-            await tool.execute(invocation)
+            return await tool.execute(invocation)
         # 1
         except Exception as e:
             logger.exception(f'Tool -> {name} raised unexpected error -> {str(e)}')

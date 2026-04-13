@@ -74,9 +74,9 @@ class ReadFileTool(Tool):
             total_lines = len(lines)
 
             if total_lines == 0:
-                # The tool should not return an empty string, might confuse the LLM
+                # The tool should not return an empty string, might confuse the LLM.
                 # Return a success instead; though the file was read, it was empty.
-                # Can help user to save tokens :)
+                # Can help user to save tokens.
                 return ToolResult.success_result(
                     'File is empty',
                     metadata={
@@ -98,7 +98,7 @@ class ReadFileTool(Tool):
                 formatted_lines.append(f'{i : 6} | {line}')
 
             output = '\n'.join(formatted_lines)
-            token_count = count_tokens(output)
+            token_count = count_tokens(output, model='arcee-ai/trinity-large-preview:free')
             
             truncated = False
             if token_count > self.MAX_TOKEN_COUNT:

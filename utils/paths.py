@@ -18,7 +18,7 @@ def is_binary_file(path: str | Path) -> bool:
     try:
         with open(path, 'rb') as f:
             chunk = f.read(8192) # <- Read first 8 KBs
-            return f'\x00' in chunk # <- Check for null bytes
+            return b'\x00' in chunk # <- Check for null bytes
 
     except(OSError, IOError):
         return False
