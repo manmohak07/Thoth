@@ -171,13 +171,14 @@ class LLMClient:
                     idx = tool_call_delta.index
                     if idx not in tool_calls:
                         tool_calls[idx] = {
-                            'id': tool_call_delta or '',
+                            'id': tool_call_delta.id or '',
                             'name': '',
                             'arguments': ''
                         }
 
-                        if tool_call_delta.function:
-                            if tool_call_delta.function.name:
+                    if tool_call_delta.function:
+                        if tool_call_delta.function.name:
+                            if not tool_calls[idx]['name']:
                                 tool_calls[idx]['name'] = tool_call_delta.function.name
                                 yield StreamEvent(
                                     type=StreamEventType.TOOL_CALL_START,
@@ -186,19 +187,18 @@ class LLMClient:
                                         name=tool_call_delta.function.name,
                                     ),
                                 )
-                        
-                        
+
                         if tool_call_delta.function.arguments:
                             tool_calls[idx]['arguments'] += tool_call_delta.function.arguments
                             yield StreamEvent(
                                     type=StreamEventType.TOOL_CALL_DELTA,
                                     tool_call_delta=ToolCallDelta(
                                         call_id=tool_calls[idx]['id'],
-                                        name=tool_call_delta.function.name,
+                                        name=tool_calls[idx]['name'],
                                         arguments_delta=tool_call_delta.function.arguments,
                                     ),
                                 )
-
+                                
         for idx, tc in tool_calls.items():
             yield StreamEvent(
                     type=StreamEventType.TOOL_CALL_COMPLETE,

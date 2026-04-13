@@ -59,7 +59,7 @@ class ToolCall:
 class ToolCallDelta:
     call_id: str
     name: str | None = None
-    agruments_delta: str = ''
+    arguments_delta: str = ''
 
 @dataclass
 class StreamEvent:
