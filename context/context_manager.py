@@ -30,7 +30,7 @@ class MessageItem:
 class ContextManager:
     def __init__(self) -> None:
         self._system_prompt = get_system_prompt()
-        self._model_name = 'arcee-ai/trinity-large-preview:free'
+        self._model_name = 'nvidia/nemotron-3-super-120b-a12b:free'
         self._messages: list[MessageItem] = []
 
     def add_user_message(self, content: str) -> None:

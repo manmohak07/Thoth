@@ -49,7 +49,7 @@ class LLMClient:
         # client = self.get_mistral_client()
 
         kwargs = {
-            'model': 'arcee-ai/trinity-large-preview:free',
+            'model': 'nvidia/nemotron-3-super-120b-a12b:free',
             'messages': messages,
             'stream': stream,
         }
