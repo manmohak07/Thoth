@@ -30,7 +30,7 @@ class MessageItem:
 class ContextManager:
     def __init__(self) -> None:
         self._system_prompt = get_system_prompt()
-        self._model_name = 'nvidia/nemotron-3-super-120b-a12b:free'
+        self._model_name = 'openrouter/elephant-alpha'
         self._messages: list[MessageItem] = []
 
     def add_user_message(self, content: str) -> None:
@@ -42,11 +42,19 @@ class ContextManager:
 
         self._messages.append(item)
 
-    def add_assistant_message(self, content: str) -> None:
+    def add_assistant_message(
+            self, 
+            content: str, 
+            tool_calls: list[dict[str, Any]] | None = None,
+    ) -> None:
         item = MessageItem(
             role='assistant',
             content=content or '',
-            token_count=count_tokens(content or '', self._model_name),
+            token_count=count_tokens(
+                content or '',
+                self._model_name
+            ),
+            tool_calls=tool_calls or []
         )
 
         self._messages.append(item)

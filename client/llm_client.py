@@ -18,8 +18,8 @@ class LLMClient:
     def get_client(self) -> AsyncOpenAI:
         if self._client is None:
             self._client = AsyncOpenAI(
-                api_key=os.getenv('OPEN_ROUTER_API_KEY'),
-                base_url='https://openrouter.ai/api/v1',
+                api_key=os.getenv('API_KEY'),
+                base_url=os.getenv('BASE_URL'),
             )
 
         return self._client
@@ -49,7 +49,7 @@ class LLMClient:
         # client = self.get_mistral_client()
 
         kwargs = {
-            'model': 'nvidia/nemotron-3-super-120b-a12b:free',
+            'model': 'openrouter/elephant-alpha',
             'messages': messages,
             'stream': stream,
         }

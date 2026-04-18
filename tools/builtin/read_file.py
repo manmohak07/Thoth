@@ -98,7 +98,7 @@ class ReadFileTool(Tool):
                 formatted_lines.append(f'{i : 6} | {line}')
 
             output = '\n'.join(formatted_lines)
-            token_count = count_tokens(output, model='nvidia/nemotron-3-super-120b-a12b:free')
+            token_count = count_tokens(output, model='openrouter/elephant-alpha')
             
             truncated = False
             if token_count > self.MAX_TOKEN_COUNT:

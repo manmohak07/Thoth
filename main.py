@@ -1,10 +1,12 @@
 import asyncio
+from pathlib import Path
 import sys
 import click
 
 from agent.agent import Agent
 from agent.events import AgentEventType
 from client.llm_client import LLMClient
+from config.loader import load_config
 from ui.tui import TUI, get_console
 
 console = get_console()
@@ -21,6 +23,14 @@ class CLI:
             return await self._process_message(message)
     
     async def run_interactive(self) -> str | None:
+        self.tui.welcome(
+            'Thoth',
+            lines=[
+                'model: openrouter/elephant-alpha',
+                f'cwd: {Path.cwd()}',
+                'commands: /help /config /approval /model /exit',
+            ],
+        )
         async with Agent() as agent:
             self.agent = agent
 
@@ -104,17 +114,38 @@ class CLI:
         return tool_kind
 
 @click.command()
-@click.argument('prompt', required=False)
+@click.argument('prompt', required=False) # <- Can pass the prompt directly. No need to pass --prompt in CLI.
+@click.option(
+    '--cwd',
+    '-c',
+    type=click.Path(exists=True, file_okay=False, path_type=Path), # <- Should be a path, won't accept if it's  file
+    help='Current working directory'
+)
 def main(
     prompt: str | None,
+    cwd: Path | None,
 ):
     # print(prompt)
-    cli = CLI()
     # messages = [{
     #     'role': 'user',
     #     'content': prompt,
     # }]
+    try:
+        config = load_config(cwd=cwd)
+    except Exception as e:
+        console.print(f'[error] Configuration Error(main.py) -> {e} [/error]')
+    
+    errors = config.validate()
+    if errors:
+        for error in errors:
+            console.print(f'[error] Errors found(main.py) -> {error} [/error]')
+        
+        console.print(f'Exiting')
+        sys.exit(1)
 
+    # Intitialise CLI iff there are no errors from configurations.
+
+    cli = CLI()
     if prompt:
         result = asyncio.run(cli.run_single(prompt))
         if result is None:
