@@ -27,7 +27,7 @@ class CLI:
         self.tui.welcome(
             'Thoth',
             lines=[
-                'model: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+                'model: minimax/minimax-m2.5:free',
                 f'cwd: {Path.cwd()}',
                 'commands: /help /config /approval /model /exit',
             ],

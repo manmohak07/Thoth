@@ -51,7 +51,7 @@ class LLMClient:
         # client = self.get_mistral_client()
 
         kwargs = {
-            'model': 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+            'model': 'minimax/minimax-m2.5:free',
             'messages': messages,
             'stream': stream,
         }
