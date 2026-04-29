@@ -4,12 +4,14 @@ from typing import AsyncGenerator
 from agent.events import AgentEvent, AgentEventType
 from client.llm_client import LLMClient
 from client.response import StreamEventType, ToolCall, ToolResultMessage
+from config.config import Config
 from context.context_manager import ContextManager
 from tools.registry import create_default_registry
 
 class Agent:
-    def __init__(self):
-        self.client = LLMClient()
+    def __init__(self, config: Config):
+        self.config = config
+        self.client = LLMClient(config=config)
         self.context_manager = ContextManager()
         self.tool_registry = create_default_registry()
 
