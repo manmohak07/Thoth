@@ -50,7 +50,7 @@ def load_config(cwd: Path | None) -> Config:
     
     if 'dev_instructions' not in config_dict:
         # If dev instructions are not provided, read AGENTS.md file which is specific to a project.
-        agent_md_content = _get_agent_md_files(cwd)
+        agent_md_content = _get_agent_md_file(cwd)
         if agent_md_content:
             config_dict['dev_instructions'] = agent_md_content
     
@@ -61,7 +61,7 @@ def load_config(cwd: Path | None) -> Config:
 
     return config
 
-def _get_agent_md_files(cwd: Path) -> Path | None:
+def _get_agent_md_file(cwd: Path) -> Path | None:
     current = cwd.resolve()
 
     if current.is_dir():
