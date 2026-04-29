@@ -49,7 +49,7 @@ class LLMClient:
         # client = self.get_mistral_client()
 
         kwargs = {
-            'model': 'openrouter/elephant-alpha',
+            'model': 'minimax/minimax-m2.5:free',
             'messages': messages,
             'stream': stream,
         }

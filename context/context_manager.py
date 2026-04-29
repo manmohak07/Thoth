@@ -30,7 +30,7 @@ class MessageItem:
 class ContextManager:
     def __init__(self) -> None:
         self._system_prompt = get_system_prompt()
-        self._model_name = 'openrouter/elephant-alpha'
+        self._model_name = 'minimax/minimax-m2.5:free'
         self._messages: list[MessageItem] = []
 
     def add_user_message(self, content: str) -> None:

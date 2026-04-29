@@ -98,7 +98,7 @@ class ReadFileTool(Tool):
                 formatted_lines.append(f'{i : 6} | {line}')
 
             output = '\n'.join(formatted_lines)
-            token_count = count_tokens(output, model='openrouter/elephant-alpha')
+            token_count = count_tokens(output, model='minimax/minimax-m2.5:free')
             
             truncated = False
             if token_count > self.MAX_TOKEN_COUNT:
