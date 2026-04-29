@@ -4,7 +4,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 class ModelConfig(BaseModel):
-    name: str = 'openrouter/elephant-alpha' # <- default model
+    name: str = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free' # <- default model
     temperature: float = Field(default=0.4, ge=0.0, le=1.0) 
     content_window: int = 256_000
 

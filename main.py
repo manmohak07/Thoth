@@ -6,19 +6,20 @@ import click
 from agent.agent import Agent
 from agent.events import AgentEventType
 from client.llm_client import LLMClient
+from config.config import Config
 from config.loader import load_config
 from ui.tui import TUI, get_console
 
 console = get_console()
 
 class CLI:
-    def __init__(self):
+    def __init__(self, config: Config):
         self.agent: Agent | None = None
+        self.config = config
         self.tui = TUI(console)
 
-
     async def run_single(self, message: str) -> str | None:
-        async with Agent() as agent:
+        async with Agent(self.config) as agent:
             self.agent = agent
             return await self._process_message(message)
     
@@ -26,12 +27,12 @@ class CLI:
         self.tui.welcome(
             'Thoth',
             lines=[
-                'model: openrouter/elephant-alpha',
+                'model: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
                 f'cwd: {Path.cwd()}',
                 'commands: /help /config /approval /model /exit',
             ],
         )
-        async with Agent() as agent:
+        async with Agent(self.config) as agent:
             self.agent = agent
 
             while True:
@@ -118,7 +119,7 @@ class CLI:
 @click.option(
     '--cwd',
     '-c',
-    type=click.Path(exists=True, file_okay=False, path_type=Path), # <- Should be a path, won't accept if it's  file
+    type=click.Path(exists=True, file_okay=False, path_type=Path), # <- Should be a path, won't accept if it's file
     help='Current working directory'
 )
 def main(
@@ -145,7 +146,7 @@ def main(
 
     # Intitialise CLI iff there are no errors from configurations.
 
-    cli = CLI()
+    cli = CLI(config)
     if prompt:
         result = asyncio.run(cli.run_single(prompt))
         if result is None:

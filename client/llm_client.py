@@ -7,19 +7,21 @@ from dotenv import load_dotenv
 # from mistralai.models import UserMessage
 
 from client.response import StreamEventType, StreamEvent, TextDelta, TokenUsage, ToolCall, ToolCallDelta, parse_tool_call_arguments
+from config.config import Config
 
 load_dotenv()
 
 class LLMClient:
-    def __init__(self) -> None:
+    def __init__(self, config: Config) -> None:
         self._client : AsyncOpenAI | None = None
         self._max_retries: int = 3
+        self.config = config
     
     def get_client(self) -> AsyncOpenAI:
         if self._client is None:
             self._client = AsyncOpenAI(
-                api_key=os.getenv('API_KEY'),
-                base_url=os.getenv('BASE_URL'),
+                api_key=self.config.api_key,
+                base_url=self.config.base_url,
             )
 
         return self._client
@@ -49,7 +51,7 @@ class LLMClient:
         # client = self.get_mistral_client()
 
         kwargs = {
-            'model': 'openrouter/elephant-alpha',
+            'model': 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
             'messages': messages,
             'stream': stream,
         }
