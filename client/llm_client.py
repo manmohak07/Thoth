@@ -51,7 +51,7 @@ class LLMClient:
         # client = self.get_mistral_client()
 
         kwargs = {
-            'model': 'minimax/minimax-m2.5:free',
+            'model': self.config.model_name,
             'messages': messages,
             'stream': stream,
         }

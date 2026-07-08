@@ -12,6 +12,7 @@ from rich.theme import Theme
 
 from typing import Any, Tuple
 
+from config.config import Config
 from utils.paths import display_path_relative_to_cwd
 
 import re
@@ -59,11 +60,16 @@ def get_console() -> Console:
     return _console
 
 class TUI:
-    def __init__(self, console: Console | None = None) -> None:
+    def __init__(
+            self,
+            config: Config,
+            console: Console | None = None
+    ) -> None:
         self.console = _console or get_console()
+        self.config = config
         self._assistant_stream_open = False
         self._tool_args_by_call_id: dict[str, dict[str, Any]] = {}
-        self.cwd = Path.cwd()
+        self.cwd = self.config.cwd
 
     def begin_assistant(self) -> None:
         self.console.print()

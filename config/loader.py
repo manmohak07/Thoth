@@ -28,7 +28,6 @@ def load_config(cwd: Path | None) -> Config:
     cwd = cwd or Path.cwd()
 
     sys_path = get_system_config_path()
-
     config_dict: dict[str, Any] = {}
 
     if sys_path.is_file():

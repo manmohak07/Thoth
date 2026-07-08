@@ -4,7 +4,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 class ModelConfig(BaseModel):
-    name: str = 'minimax/minimax-m2.5:free' # <- default model
+    name: str = 'poolside/laguna-m.1:free' # <- default model
     temperature: float = Field(default=0.4, ge=0.0, le=1.0) 
     content_window: int = 256_000
 
@@ -13,7 +13,7 @@ class Config(BaseModel):
     cwd: Path = Field(default_factory=Path.cwd)
 
     max_turns: int = 70
-    max_tool_output_tokens: int = 50_000
+    # max_tool_output_tokens: int = 50_000
 
     dev_instructions: str | None = None
     user_instructions: str | None = None

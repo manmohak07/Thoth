@@ -1,5 +1,6 @@
 from typing import Any
 
+from config.config import Config
 from prompts.system import get_system_prompt
 from dataclasses import dataclass, field
 
@@ -28,9 +29,10 @@ class MessageItem:
         return result
 
 class ContextManager:
-    def __init__(self) -> None:
-        self._system_prompt = get_system_prompt()
-        self._model_name = 'minimax/minimax-m2.5:free'
+    def __init__(self, config: Config) -> None:
+        self._system_prompt = get_system_prompt(config)
+        self.config = config
+        self._model_name = self.config.model_name
         self._messages: list[MessageItem] = []
 
     def add_user_message(self, content: str) -> None:
