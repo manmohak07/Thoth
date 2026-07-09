@@ -1,23 +1,23 @@
 from __future__ import annotations
-from pathlib import Path
 from typing import AsyncGenerator
+from agent.session import Session
 from agent.events import AgentEvent, AgentEventType
 from client.llm_client import LLMClient
 from client.response import StreamEventType, ToolCall, ToolResultMessage
 from config.config import Config
-from context.context_manager import ContextManager
-from tools.registry import create_default_registry
 
 class Agent:
     def __init__(self, config: Config):
         self.config = config
-        self.client = LLMClient(config=config)
-        self.context_manager = ContextManager(config=config)
-        self.tool_registry = create_default_registry()
+        self.session : Session | None = Session(self.config)
+        # Instantiated in session.py
+        # self.client = LLMClient(config=config)
+        # self.context_manager = ContextManager(config=config)
+        # self.tool_registry = create_default_registry()
 
     async def run(self, message: str):
         yield AgentEvent.agent_start(message)
-        self.context_manager.add_user_message(message)
+        self.session.context_manager.add_user_message(message)
 
         final_response: str | None = None
 
@@ -36,14 +36,15 @@ class Agent:
         # }]
 
         max_turns = self.config.max_turns
+        self.session.increment_turn()
         for i in range(max_turns):
-            tool_schemas = self.tool_registry.get_schemas()
+            tool_schemas = self.session.tool_registry.get_schemas()
 
             response_text = ""
             tool_calls: list[ToolCall] = []
 
-            async for event in self.client.chat_completion(
-                self.context_manager.get_messages(),
+            async for event in self.session.client.chat_completion(
+                self.session.context_manager.get_messages(),
                 tools=tool_schemas if tool_schemas else None,
                 # stream=True,
             ):
@@ -60,7 +61,7 @@ class Agent:
                 elif event.type == StreamEventType.ERROR:
                     yield AgentEvent.agent_error(event.error or "Unknown Error Occured")
             
-            self.context_manager.add_assistant_message(
+            self.session.context_manager.add_assistant_message(
                 response_text or None,
                 # Add context for what tool was called
                 [
@@ -91,7 +92,7 @@ class Agent:
                     tc.arguments,
                 )
                 
-                result = await self.tool_registry.invoke(
+                result = await self.session.tool_registry.invoke(
                     tc.name,
                     tc.arguments,
                     self.config.cwd,
@@ -112,7 +113,7 @@ class Agent:
                 )
 
             for tr in tool_call_result:
-                self.context_manager.add_tool_result(
+                self.session.context_manager.add_tool_result(
                     tr.tool_call_id,
                     tr.content,
                 )
@@ -123,6 +124,6 @@ class Agent:
         return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        if self.client:
-            await self.client.close()
-            self.client = None
+        if self.session and self.session.client:
+            await self.session.client.close()
+            self.session = None
