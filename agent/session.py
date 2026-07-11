@@ -20,7 +20,7 @@ class Session:
         self._turn_count = 0
     
     def increment_turn(self) -> int:
-        self.turn_count += 1
+        self._turn_count += 1
         self.updated_at = datetime.now()
 
         return self._turn_count
