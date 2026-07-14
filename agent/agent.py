@@ -5,6 +5,7 @@ from agent.events import AgentEvent, AgentEventType
 from client.llm_client import LLMClient
 from client.response import StreamEventType, ToolCall, ToolResultMessage
 from config.config import Config
+import json
 
 class Agent:
     def __init__(self, config: Config):
@@ -70,7 +71,7 @@ class Agent:
                         'type': 'function',
                         'function': {
                             'name': tc.name,
-                            'arguments': str(tc.arguments),
+                            'arguments': json.dumps(tc.arguments),
                         },
                     }
                     for tc in tool_calls

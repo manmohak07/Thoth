@@ -102,6 +102,7 @@ class CLI:
                     event.data.get('metadata'),
                     event.data.get('truncated', False ),
                     event.data.get('diff', None),
+                    event.data.get('exit_code', None),
                 )
         return final_response
     
