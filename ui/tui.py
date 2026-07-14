@@ -94,6 +94,7 @@ class TUI:
             'write_file': ['path', 'create_directories', 'content'],
             'edit': ['path', 'replace_all', 'old_string', 'new_string'],
             'shell': ['command', 'timeout', 'cwd'],
+            'list_dir': ['path', 'include_hidden_files'],
         }
 
         preferred = _PREFERRED_ORDER.get(tool_name, [])
@@ -121,6 +122,9 @@ class TUI:
                     line_count = len(value.splitlines()) or 0
                     byte_count = len(value.encode("utf-8", errors="replace"))
                     value = f"<{line_count} lines • {byte_count} bytes>"
+            
+            if isinstance(value, bool):
+                value = str(value)
 
             if isinstance(value, bool):
                 value = str(value)
@@ -296,6 +300,64 @@ class TUI:
                     )
                 )
 
+        elif name == 'list_dir':
+            entries = metadata.get('entries')
+            path = metadata.get('path')
+
+            summary = []
+
+            if isinstance(path, str):
+                summary.append(path)
+            
+            if isinstance(entries, int):
+                summary.append(f'{entries} entries')
+
+            if summary:
+                blocks.append(Text(
+                    ' • '.join(summary),
+                    style='muted',
+                ))
+            
+            output_display = truncate_text(
+                output,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+
+            blocks.append(
+                    Syntax(
+                        output_display,
+                        'text',
+                        theme='monokai',
+                        word_wrap=True,
+                    )
+                )
+        
+        if error and not success:
+            blocks.append(Text(
+                error,
+                style='error',
+            ))
+
+            output_display = truncate_text(
+                output,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+
+            if output_display.strip():
+                blocks.append(
+                    Syntax(
+                        output_display,
+                        'text',
+                        theme='monokai',
+                        word_wrap=True,
+                    ))
+            else:
+                blocks.append(Text(
+                    '(no output)',
+                    style='muted',
+                ))
 
         if truncated:
             blocks.append(Text('Tool output was truncated', style='warning'))
