@@ -70,7 +70,7 @@ class TUI:
         self._assistant_stream_open = False
         self._tool_args_by_call_id: dict[str, dict[str, Any]] = {}
         self.cwd = self.config.cwd
-        self._max_block_tokens = 240
+        self._max_block_tokens = 3000
 
     def begin_assistant(self) -> None:
         self.console.print()
@@ -95,6 +95,8 @@ class TUI:
             'edit': ['path', 'replace_all', 'old_string', 'new_string'],
             'shell': ['command', 'timeout', 'cwd'],
             'list_dir': ['path', 'include_hidden_files'],
+            'grep': ['path', 'case_insensitive', 'pattern'],
+            'glob': ['path', 'pattern'],
         }
 
         preferred = _PREFERRED_ORDER.get(tool_name, [])
@@ -276,7 +278,7 @@ class TUI:
                 self._max_block_tokens
             )
         
-        elif name == 'shell':
+        elif name == 'shell' and success:
             command = args.get('command')
 
             if isinstance(command, str) and command.strip():
@@ -300,7 +302,7 @@ class TUI:
                     )
                 )
 
-        elif name == 'list_dir':
+        elif name == 'list_dir' and success:
             entries = metadata.get('entries')
             path = metadata.get('path')
 
@@ -332,6 +334,64 @@ class TUI:
                         word_wrap=True,
                     )
                 )
+        
+        elif name == 'grep' and success:
+            matches = metadata.get('matches')
+            files_searched = metadata.get('files_searched')
+
+            summary = []
+            if isinstance(matches, int):
+                summary.append(f'matches -> {matches}')
+            
+            if isinstance(files_searched, int):
+                summary.append(f'files searched -> {files_searched}')
+            
+            
+            if summary:
+                blocks.append(Text(
+                    ' • '.join(summary),
+                    style='muted',
+                ))
+            
+            output_display = truncate_text(
+                output,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+
+            blocks.append(
+                    Syntax(
+                        output_display,
+                        'text',
+                        theme='monokai',
+                        word_wrap=True,
+                    )
+                )
+        
+        elif name == 'glob' and success:
+            matches = metadata.get('matches')
+
+            if isinstance(matches, int):
+                blocks.append(Text(
+                    f'matches -> {matches}',
+                    style='muted',
+                ))      
+            
+            output_display = truncate_text(
+                output,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+
+            blocks.append(
+                    Syntax(
+                        output_display,
+                        'text',
+                        theme='monokai',
+                        word_wrap=True,
+                    )
+                )
+
         
         if error and not success:
             blocks.append(Text(
