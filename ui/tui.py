@@ -97,6 +97,7 @@ class TUI:
             'list_dir': ['path', 'include_hidden_files'],
             'grep': ['path', 'case_insensitive', 'pattern'],
             'glob': ['path', 'pattern'],
+            "todos": ["id", "action", "content"],
         }
 
         preferred = _PREFERRED_ORDER.get(tool_name, [])
@@ -397,18 +398,62 @@ class TUI:
                     )
                 )
         
-        elif name == "web_search" and success:
-            results = metadata.get("results")
-            query = args.get("query")
+        elif name == 'web_search' and success:
+            results = metadata.get('results')
+            query = args.get('query')
             summary = []
             if isinstance(query, str):
                 summary.append(query)
             if isinstance(results, int):
-                summary.append(f"{results} results")
+                summary.append(f'{results} results')
 
             if summary:
-                blocks.append(Text(" • ".join(summary), style="muted"))
+                blocks.append(Text(' • '.join(summary), style='muted'))
 
+            output_display = truncate_text(
+                output,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+            blocks.append(
+                Syntax(
+                    output_display,
+                    'text',
+                    theme='monokai',
+                    word_wrap=True,
+                )
+            )
+        
+        elif name == 'web_fetch' and success:
+            status_code = metadata.get('status_code')
+            content_length = metadata.get('content_length')
+            url = args.get('url')
+            summary = []
+            if isinstance(status_code, int):
+                summary.append(str(status_code))
+            if isinstance(content_length, int):
+                summary.append(f'{str(content_length)} bytes')
+            if isinstance(url, str):
+                summary.append(url)
+
+            if summary:
+                blocks.append(Text(' • '.join(summary), style='muted'))
+
+            output_display = truncate_text(
+                output,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+            blocks.append(
+                Syntax(
+                    output_display,
+                    'text',
+                    theme='monokai',
+                    word_wrap=True,
+                )
+            )
+
+        elif name == "todos" and success:
             output_display = truncate_text(
                 output,
                 self.config.model_name,
@@ -422,7 +467,6 @@ class TUI:
                     word_wrap=True,
                 )
             )
-
 
         
         if error and not success:
