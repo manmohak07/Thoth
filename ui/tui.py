@@ -272,7 +272,15 @@ class TUI:
             diff_display = truncate_text(
                 diff_text,
                 self.config.model_name,
-                self._max_block_tokens
+                self._max_block_tokens,
+            )
+            blocks.append(
+                Syntax(
+                    diff_display,
+                    'diff',
+                    theme='monokai',
+                    word_wrap=True,
+                )
             )
         
         elif name == 'shell' and success:
