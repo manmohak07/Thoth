@@ -125,12 +125,9 @@ class TUI:
                     byte_count = len(value.encode("utf-8", errors="replace"))
                     value = f"<{line_count} lines • {byte_count} bytes>"
             
-            if isinstance(value, bool):
+            if not isinstance(value, str):
                 value = str(value)
-
-            if isinstance(value, bool):
-                value = str(value)
-
+                
             table.add_row(key, value)
 
         
@@ -391,6 +388,33 @@ class TUI:
                         word_wrap=True,
                     )
                 )
+        
+        elif name == "web_search" and success:
+            results = metadata.get("results")
+            query = args.get("query")
+            summary = []
+            if isinstance(query, str):
+                summary.append(query)
+            if isinstance(results, int):
+                summary.append(f"{results} results")
+
+            if summary:
+                blocks.append(Text(" • ".join(summary), style="muted"))
+
+            output_display = truncate_text(
+                output,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+            blocks.append(
+                Syntax(
+                    output_display,
+                    "text",
+                    theme="monokai",
+                    word_wrap=True,
+                )
+            )
+
 
         
         if error and not success:
