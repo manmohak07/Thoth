@@ -28,7 +28,7 @@ class WebSearchTool(Tool):
                 region="us-en",
                 safesearch="off",
                 timelimit="y",
-                page=1,
+                max_results=params.max_results,
                 backend="auto",
             )
         except Exception as e:

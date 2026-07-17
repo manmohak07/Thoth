@@ -31,11 +31,6 @@ class Agent:
         yield AgentEvent.agent_end(final_response)
 
     async def _agentic_loop(self) -> AsyncGenerator[AgentEvent, None]:
-        # messages = [{
-        #     'role': 'user',
-        #     'content': 'Hey, how are ya?',
-        # }]
-
         max_turns = self.config.max_turns
         self.session.increment_turn()
         for i in range(max_turns):
