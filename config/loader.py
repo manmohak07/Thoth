@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 from pathlib import Path
-from platformdirs import user_config_dir
+from platformdirs import user_config_dir, user_data_dir
 import tomli
 from typing import Any
 
@@ -20,6 +20,9 @@ CONFIG_FILE_NAME = 'config.toml'
 
 def get_config_dir() -> Path:
     return Path(user_config_dir('ai-agent'))
+
+def get_data_dir() -> Path:
+    return Path(user_data_dir("ai-agent"))
 
 def get_system_config_path() -> Path:
     return get_config_dir() / CONFIG_FILE_NAME
