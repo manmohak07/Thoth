@@ -6,12 +6,15 @@ from tools.base import Tool, ToolInvocation, ToolResult
 from tools.builtin import ReadFileTool, get_all_builtin_tools
 import logging
 
+from tools.subagents import SubAgent, get_default_subagent_definitions
+
 logger = logging.getLogger(__name__)
 
 
 class ToolRegistry:
-    def __init__(self):
+    def __init__(self, config: Config):
         self._tools: dict[str, Tool] = {}
+        self.config = config
     
     def get(self, name: str) -> Tool | None:
         if name in self._tools:
@@ -44,6 +47,10 @@ class ToolRegistry:
         for tool in self._tools.values():
             tools.append(tool)
         
+        if self.config.allowed_tools:
+            allowed_tools_set = set(self.config.allowed_tools)
+            tools = [t for t in tools if t.name in allowed_tools_set]
+            
         return tools
 
     async def invoke(
@@ -91,11 +98,13 @@ class ToolRegistry:
             )
 
 def create_default_registry(config: Config) -> ToolRegistry:
-    registry = ToolRegistry()
+    registry = ToolRegistry(config)
     BUILTIN_TOOLS = [ReadFileTool]
 
     for tool_class in get_all_builtin_tools():
         registry.register(tool_class(config))
 
+    for subagent_def in get_default_subagent_definitions():
+        registry.register(SubAgent(config, subagent_def))
     return registry
 

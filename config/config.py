@@ -1,17 +1,18 @@
 import os
 from pathlib import Path
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 class ModelConfig(BaseModel):
-    name: str = 'devstral-2512' # <- default model
+    name: str = 'codestral-2508' # <- default model
     temperature: float = Field(default=0.4, ge=0.0, le=1.0) 
     content_window: int = 256_000
 
 class ShellEnvironmentPolicy(BaseModel):
     ignore_default_excludes: bool = False # Ignore the list below
     exclude_patterns: list[str] = Field( # Ignore env-vars based on these patterns
-        default_factory=lambda: [
+        default_factory=lambda:[
             '*KEY*',
             '*TOKEN*',
             '*SECRET*',
@@ -32,6 +33,11 @@ class Config(BaseModel):
     user_instructions: str | None = None
 
     debug: bool = False
+
+    allowed_tools: list[str] | None = Field(
+        None,
+        description='If set, only these tools will be available to the agent.',
+    )
 
     @property
     def api_key(self) -> str | None:
@@ -68,3 +74,6 @@ class Config(BaseModel):
         
 
         return errors
+
+    def to_dict(self) -> dict[str, Any]:
+        return self.model_dump(mode='json')

@@ -32,8 +32,9 @@ class Agent:
 
     async def _agentic_loop(self) -> AsyncGenerator[AgentEvent, None]:
         max_turns = self.config.max_turns
-        self.session.increment_turn()
+        
         for i in range(max_turns):
+            self.session.increment_turn()
             tool_schemas = self.session.tool_registry.get_schemas()
 
             response_text = ""
@@ -114,6 +115,7 @@ class Agent:
                     tr.content,
                 )
 
+        yield AgentEvent.agent_error(f'Maximum turns -> {max_turns} reached')
 
 
     async def __aenter__(self) -> Agent:

@@ -146,7 +146,7 @@ class TUI:
         border_style = f'tool.{tool_kind}' if tool_kind else 'tool'
 
         title = Text.assemble(
-            ('🫡  ', 'muted'),
+            ('🟢  ', 'muted'),
             (name, 'tool'),
             ('  ', 'muted'),
             (f'{call_id[:8]}', 'muted'),
@@ -497,12 +497,12 @@ class TUI:
                 )
             )
         
-        
-        if error and not success:
-            blocks.append(Text(
-                error,
-                style='error',
-            ))
+        else:
+            if error and not success:
+                blocks.append(Text(
+                    error,
+                    style='error',
+                ))
 
             output_display = truncate_text(
                 output,
