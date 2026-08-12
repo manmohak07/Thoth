@@ -5,6 +5,7 @@ import uuid
 from client.llm_client import LLMClient
 from config.config import Config
 from config.loader import get_data_dir
+from context.compression import Compressor
 from context.context_manager import ContextManager
 from tools.discovery import ToolDiscoveryManager
 from tools.mcp.manager import MCPManager
@@ -23,6 +24,8 @@ class Session:
         )
 
         self.mcp_manager = MCPManager(self.config)
+
+        self.compressor = Compressor(self.client)
 
         self.session_id = str(uuid.uuid4())
         self.created_at = datetime.now()

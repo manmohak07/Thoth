@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 from agent.session import Session
 from agent.events import AgentEvent, AgentEventType
 from client.llm_client import LLMClient
-from client.response import StreamEventType, ToolCall, ToolResultMessage
+from client.response import StreamEventType, TokenUsage, ToolCall, ToolResultMessage
 from config.config import Config
 import json
 
@@ -35,10 +35,23 @@ class Agent:
         
         for i in range(max_turns):
             self.session.increment_turn()
-            tool_schemas = self.session.tool_registry.get_schemas()
-
             response_text = ""
+
+            if self.session.context_manager.needs_compression():
+                summary, usage = await self.session.compressor.compress(
+                    self.session.context_manager
+                )
+
+                if summary:
+                    self.session.context_manager.replace_with_summary(summary)
+                    self.session.context_manager.set_latest_usage(usage)
+                    self.session.context_manager.add_usage(usage)
+
+
+            tool_schemas = self.session.tool_registry.get_schemas()
             tool_calls: list[ToolCall] = []
+
+            usage: TokenUsage | None = None
 
             async for event in self.session.client.chat_completion(
                 self.session.context_manager.get_messages(),
@@ -57,6 +70,9 @@ class Agent:
 
                 elif event.type == StreamEventType.ERROR:
                     yield AgentEvent.agent_error(event.error or "Unknown Error Occured")
+
+                elif event.type == StreamEventType.MESSAGE_COMPLETE:
+                    usage = event.usage
             
             self.session.context_manager.add_assistant_message(
                 response_text or None,
@@ -78,6 +94,10 @@ class Agent:
                 yield AgentEvent.text_complete(response_text)
 
             if not tool_calls:
+                if usage:
+                    self.session.context_manager.set_latest_usage(usage)
+                    self.session.context_manager.add_usage(usage)
+
                 return
 
             tool_call_result: list[ToolResultMessage] = []
@@ -114,6 +134,10 @@ class Agent:
                     tr.tool_call_id,
                     tr.content,
                 )
+
+            if usage:
+                self.session.context_manager.set_latest_usage(usage)
+                self.session.context_manager.add_usage(usage)
 
         yield AgentEvent.agent_error(f'Maximum turns -> {max_turns} reached')
 

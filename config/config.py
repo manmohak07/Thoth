@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, model_validator
 class ModelConfig(BaseModel):
     name: str = 'devstral-2512' # <- default model
     temperature: float = Field(default=0.4, ge=0.0, le=1.0) 
-    content_window: int = 256_000
+    context_window: int = 256_000
 
 class ShellEnvironmentPolicy(BaseModel):
     ignore_default_excludes: bool = False # Ignore the list below

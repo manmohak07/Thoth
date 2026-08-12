@@ -26,7 +26,7 @@ class TokenUsage:
     total_tokens: int = 0
     cached_tokens: int = 0
 
-    # Can't pass te same class within the same class (could do before Py 3.8)
+    # Can't pass the same class within the same class (could do before Py 3.8)
     # Imported annotations for the same
     def __add__(self, other: TokenUsage):
         """
