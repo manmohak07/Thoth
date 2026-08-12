@@ -1,11 +1,12 @@
+from __future__ import annotations
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 class ModelConfig(BaseModel):
-    name: str = 'codestral-2508' # <- default model
+    name: str = 'devstral-2512' # <- default model
     temperature: float = Field(default=0.4, ge=0.0, le=1.0) 
     content_window: int = 256_000
 
@@ -20,6 +21,31 @@ class ShellEnvironmentPolicy(BaseModel):
     )
     set_vars: dict[str, str] = Field(default_factory=dict)
 
+class MCPServerConfig(BaseModel):
+    enabled: bool = True
+    startup_timeout_seconds: float = 10
+
+    command: str | None = None
+    args: List[str] = Field(default_factory=list)
+    env: dict[str, str] = Field(default_factory=dict)
+    cwd: Path | None = None
+
+    url: str | None = None
+
+    @model_validator(mode='after')
+    def validate_transport(self) -> MCPServerConfig:
+        has_command = self.command is not None
+        has_url = self.url is not None
+
+        if not has_command and not has_url:
+            raise ValueError('MCP Server must have command or URL')
+
+        if has_command and has_url:
+            raise ValueError('MCP Server must have either command or URL')
+
+        return self
+
+
 class Config(BaseModel):
     model: ModelConfig = Field(default_factory=ModelConfig)
     cwd: Path = Field(default_factory=Path.cwd)
@@ -28,7 +54,7 @@ class Config(BaseModel):
     )
     max_turns: int = 70
     # max_tool_output_tokens: int = 50_000
-
+    mcp_servers: dict[str, MCPServerConfig] = Field(default_factory=dict)
     dev_instructions: str | None = None
     user_instructions: str | None = None
 

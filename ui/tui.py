@@ -146,7 +146,7 @@ class TUI:
         border_style = f'tool.{tool_kind}' if tool_kind else 'tool'
 
         title = Text.assemble(
-            ('🟢  ', 'muted'),
+            ('🟢 ', 'muted'),
             (name, 'tool'),
             ('  ', 'muted'),
             (f'{call_id[:8]}', 'muted'),

@@ -14,13 +14,8 @@ logger = logging.getLogger(__name__)
 class ToolRegistry:
     def __init__(self, config: Config):
         self._tools: dict[str, Tool] = {}
+        self._mcp_tools: dict[str, Tool] = {}
         self.config = config
-    
-    def get(self, name: str) -> Tool | None:
-        if name in self._tools:
-            return self._tools[name]
-
-        return None
     
     def register(self, tool: Tool) -> None:
         if tool.name in self._tools:
@@ -28,6 +23,10 @@ class ToolRegistry:
         
         self._tools[tool.name] = tool
         logger.debug(f'Registered Tool -> {tool.name}')
+
+    def register_mcp_tool(self, tool: Tool) -> None:            
+        self._mcp_tools[tool.name] = tool
+        logger.debug(f'Registered MCP Tool -> {tool.name}')
 
     def unregister(self, name: str) -> bool:
         if name in self._tools:
@@ -37,6 +36,15 @@ class ToolRegistry:
 
         logger.warning(f'Tried to remove a tool which does not exist -> {name}')
         return False
+
+    def get(self, name: str) -> Tool | None:
+            if name in self._tools:
+                return self._tools[name]
+    
+            elif name in self._mcp_tools:
+                return self._mcp_tools[name]
+    
+            return None
     
     def get_schemas(self) -> list[dict[str, Any]]:
         return [tool.to_openai_schema() for tool in self.get_tools()]
@@ -46,6 +54,9 @@ class ToolRegistry:
 
         for tool in self._tools.values():
             tools.append(tool)
+
+        for mcp_tool in self._mcp_tools.values():
+            tools.append(mcp_tool)
         
         if self.config.allowed_tools:
             allowed_tools_set = set(self.config.allowed_tools)
