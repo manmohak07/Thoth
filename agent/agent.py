@@ -98,6 +98,9 @@ class Agent:
                     self.session.context_manager.set_latest_usage(usage)
                     self.session.context_manager.add_usage(usage)
 
+                pruned_messages = self.session.context_manager.prune_tool_outputs()
+                if pruned_messages > 0:
+                    print(f'No of pruned messages -> {pruned_messages}')
                 return
 
             tool_call_result: list[ToolResultMessage] = []
@@ -138,6 +141,10 @@ class Agent:
             if usage:
                 self.session.context_manager.set_latest_usage(usage)
                 self.session.context_manager.add_usage(usage)
+
+            pruned_messages = self.session.context_manager.prune_tool_outputs()
+            if pruned_messages > 0:
+                print(f'No of pruned messages -> {pruned_messages}')
 
         yield AgentEvent.agent_error(f'Maximum turns -> {max_turns} reached')
 
