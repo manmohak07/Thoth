@@ -7,6 +7,7 @@ from config.config import Config
 from config.loader import get_data_dir
 from context.compression import Compressor
 from context.context_manager import ContextManager
+from hooks.system import HookSystem
 from tools.discovery import ToolDiscoveryManager
 from tools.mcp.manager import MCPManager
 from tools.registry import create_default_registry
@@ -28,8 +29,8 @@ class Session:
         self.approval_manager = ApprovalManager(
             self.config.approval,
             self.config.cwd,
-            
         )
+        self.hook_system = HookSystem(config)
 
         self.session_id = str(uuid.uuid4())
         self.created_at = datetime.now()

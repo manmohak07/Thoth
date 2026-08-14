@@ -54,6 +54,31 @@ class ApprovalPolicy(str, Enum):
     NEVER = 'never'
     YOLO = 'yolo'
 
+class HookTrigger(str, Enum):
+    BEFORE_AGENT = 'before_agent'
+    AFTER_AGENT = 'after_agent'
+
+    BEFORE_TOOL = 'before_tool'
+    AFTER_TOOL = 'after_tool'
+
+    ON_ERROR = 'on_error'
+
+class HookConfig(BaseModel):
+    name: str
+    trigger: HookTrigger
+    cmd: str | None = None
+    script: str | None = None
+    timeout_secs: float = 30
+    enabled: bool = True
+
+    @model_validator(mode='after')
+    def validate_hook(self) -> HookConfig:
+        if not self.cmd and not self.script:
+            raise ValueError('Hook must have either a Command or a Script!!')
+        return self
+
+
+
 class Config(BaseModel):
     model: ModelConfig = Field(default_factory=ModelConfig)
     cwd: Path = Field(default_factory=Path.cwd)
@@ -74,6 +99,9 @@ class Config(BaseModel):
     )
 
     approval: ApprovalPolicy = ApprovalPolicy.ON_REQUEST
+
+    hooks_enabled: bool = False
+    hooks: list[HookConfig] = Field(default_factory=HookConfig)
 
     @property
     def api_key(self) -> str | None:
