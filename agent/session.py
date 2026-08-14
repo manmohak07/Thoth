@@ -10,7 +10,7 @@ from context.context_manager import ContextManager
 from tools.discovery import ToolDiscoveryManager
 from tools.mcp.manager import MCPManager
 from tools.registry import create_default_registry
-
+from safety.approval_manager import ApprovalManager, ApprovalPolicy
 
 class Session:
     def __init__(self, config: Config):
@@ -24,8 +24,12 @@ class Session:
         )
 
         self.mcp_manager = MCPManager(self.config)
-
         self.compressor = Compressor(self.client)
+        self.approval_manager = ApprovalManager(
+            self.config.approval,
+            self.config.cwd,
+            
+        )
 
         self.session_id = str(uuid.uuid4())
         self.created_at = datetime.now()

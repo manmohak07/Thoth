@@ -6,7 +6,7 @@ import sys
 
 from pydantic import BaseModel, Field
 
-from tools.base import FileDiff, Tool, ToolInvocation, ToolKind, ToolResult
+from tools.base import FileDiff, Tool, ToolConfirmation, ToolInvocation, ToolKind, ToolResult
 from utils.paths import ensure_parent_directory, resolve_path
 import fnmatch
 
@@ -53,6 +53,28 @@ class ShellTool(Tool):
     description = 'Execute a shell command. Use this for running system commands, scripts and CLI tools.'
 
     schema = ShellParams
+
+    async def get_confirmation(self, invocation: ToolInvocation) -> ToolConfirmation | None:
+            params = ShellParams(**invocation.params)
+
+            for blocked in BLOCKED_COMMANDS:
+                if blocked in params.command:
+                    return ToolConfirmation(
+                        tool_name=self.name,
+                        params=invocation.params,
+                        description=f'Execute (BLOCKED) command -> {params.command}',
+                        command=params.command,
+                        is_dangerous=True,
+                    )
+    
+            return ToolConfirmation(
+                tool_name=self.name,
+                params=invocation.params,
+                description=f'Execute -> {params.command}',
+                command=params.command,
+                is_dangerous=False,
+            )
+    
 
     async def execute(self, invocation: ToolInvocation) -> ToolResult:
         params = ShellParams(**invocation.params)

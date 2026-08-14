@@ -4,6 +4,7 @@ from rich import box # <- lower case
 from rich.console import Console
 from rich.console import Group
 from rich.panel import Panel
+from rich.prompt import Prompt
 from rich.rule import Rule
 from rich.syntax import Syntax
 from rich.table import Table
@@ -13,6 +14,7 @@ from rich.theme import Theme
 from typing import Any, Tuple
 
 from config.config import Config
+from tools.base import ToolConfirmation
 from utils.paths import display_path_relative_to_cwd
 
 import re
@@ -605,5 +607,43 @@ class TUI:
             '.swift': 'swift',
             '.sql': 'sql',
         }.get(suffix, 'text')
+
+    def handle_confirmation(self, confirmation: ToolConfirmation) -> bool:
+        output = [
+            Text(confirmation.tool_name, style='tool'),
+            Text(confirmation.description, style='code'),
+        ]
+
+        if confirmation.cmd:
+            output.append(Text(f'$ {confirmation.cmd}', style='warning'))
+
+        if confirmation.diff:
+            diff_text = confirmation.diff.to_diff()
+            output.append(
+                Syntax(
+                    diff_text,
+                    'diff',
+                    theme='monokai',
+                    word_wrap=True,
+                )
+            )
+
+        self.console.print()
+        self.console.print(
+            Panel(
+                Group(*output),
+                title=Text('Approval required', style='warning'),
+                title_align='left',
+                border_style='warning',
+                box=box.ROUNDED,
+                padding=(1, 2),
+            )
+        )
+
+        response = Prompt.ask(
+            '\nApprove?', choices=['y', 'n', 'yes', 'no'], default='n'
+        )
+
+        return response.lower() in {'y', 'yes'}
         
         

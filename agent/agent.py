@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Awaitable, Callable
 from agent.session import Session
 from agent.events import AgentEvent, AgentEventType
 from client.llm_client import LLMClient
@@ -7,10 +7,17 @@ from client.response import StreamEventType, TokenUsage, ToolCall, ToolResultMes
 from config.config import Config
 import json
 
+from tools.base import ToolConfirmation
+
 class Agent:
-    def __init__(self, config: Config):
+    def __init__(
+        self,
+        config: Config,
+        confirmation_callback: (Callable[[ToolConfirmation], bool] | None) = None,
+    ):
         self.config = config
         self.session : Session | None = Session(self.config)
+        self.session.approval_manager.confirmation_callback = confirmation_callback
         # Instantiated in session.py
         # self.client = LLMClient(config=config)
         # self.context_manager = ContextManager(config=config)
@@ -116,6 +123,7 @@ class Agent:
                     tc.name,
                     tc.arguments,
                     self.config.cwd,
+                    self.session.approval_manager,
                 )
 
                 yield AgentEvent.tool_call_complete(

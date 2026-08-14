@@ -64,6 +64,11 @@ class ToolConfirmation:
     params: dict[str, Any]
     description: str
 
+    diff: FileDiff | None = None
+    affected_paths: list[Path] = field(default_factory=list)
+    cmd: str | None = None
+    is_dangerous: bool = False
+
 @dataclass
 class ToolResult:
     success: bool

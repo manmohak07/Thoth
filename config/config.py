@@ -1,4 +1,5 @@
 from __future__ import annotations
+from enum import Enum
 import os
 from pathlib import Path
 from typing import Any, List
@@ -45,6 +46,13 @@ class MCPServerConfig(BaseModel):
 
         return self
 
+class ApprovalPolicy(str, Enum):
+    ON_REQUEST = 'on-request'
+    ON_FAILURE = 'on-failure'
+    AUTO = 'auto'
+    AUTO_EDIT = 'auto-edit'
+    NEVER = 'never'
+    YOLO = 'yolo'
 
 class Config(BaseModel):
     model: ModelConfig = Field(default_factory=ModelConfig)
@@ -64,6 +72,8 @@ class Config(BaseModel):
         None,
         description='If set, only these tools will be available to the agent.',
     )
+
+    approval: ApprovalPolicy = ApprovalPolicy.ON_REQUEST
 
     @property
     def api_key(self) -> str | None:

@@ -2,11 +2,14 @@ from pathlib import Path
 from typing import Any
 
 from config.config import Config
+from safety.approval_manager import ApprovalManager
 from tools.base import Tool, ToolInvocation, ToolResult
 from tools.builtin import ReadFileTool, get_all_builtin_tools
 import logging
 
 from tools.subagents import SubAgent, get_default_subagent_definitions
+
+from safety.approval_manager import ApprovalContext, ApprovalDecision
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +71,8 @@ class ToolRegistry:
         self,
         name: str, 
         params: dict[str, Any], 
-        cwd: Path
+        cwd: Path,
+        approval_manager: ApprovalManager | None = None
     ) -> ToolResult:
         
         tool = self.get(name)
@@ -94,6 +98,28 @@ class ToolRegistry:
             params=params,
             cwd=cwd,
         )
+
+        if approval_manager:
+            confirmation = await tool.get_confirmation(invocation)
+            if confirmation:
+                context = ApprovalContext(
+                    tool_name=name,
+                    params=params,
+                    is_mutating=tool.is_mutating(params),
+                    affected_paths=confirmation.affected_paths,
+                    cmd=confirmation.cmd,
+                    is_dangerous=confirmation.is_dangerous,
+                )
+
+                decision = await approval_manager.check_approval(context)
+                if decision == ApprovalDecision.REJECTED:
+                    return ToolResult.error_result('Operation was rejected (safety policy)')
+
+                elif decision == ApprovalDecision.NEEDS_CONFIRMATION:
+                    approved = approval_manager.request_confirmation(confirmation)
+
+                    if not approved:
+                        return ToolResult.error_result('Operation rejected by user')
 
         # 1
         try:
