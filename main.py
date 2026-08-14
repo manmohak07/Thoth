@@ -52,7 +52,7 @@ class CLI:
                 except EOFError:
                     break
         
-        console.print('[n] Exiting [\n]')
+        console.print('[n] Exiting \n')
 
             
     
