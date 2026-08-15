@@ -101,7 +101,7 @@ class Config(BaseModel):
     approval: ApprovalPolicy = ApprovalPolicy.ON_REQUEST
 
     hooks_enabled: bool = False
-    hooks: list[HookConfig] = Field(default_factory=HookConfig)
+    hooks: list[HookConfig] = Field(default_factory=list)
 
     @property
     def api_key(self) -> str | None:

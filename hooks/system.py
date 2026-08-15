@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import signal
 import sys
@@ -18,27 +19,31 @@ class HookSystem:
             self.hooks = [hook for hook in self.config.hooks if hook.enabled]
 
     async def _run_hook(self, hook: HookConfig, env: dict[str, str]) -> None:
-        if hook.cmd:
-            await self._run_command(hook.cmd, hook.timeout_secs, env)
+        try:
+            if hook.cmd:
+                await self._run_command(hook.cmd, hook.timeout_secs, env)
 
-        else:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False) as f:
-                f.write('#!/bin/bash\n')
-                f.write(hook.script)
-                script_path = f.name
+            else:
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False) as f:
+                    f.write('#!/bin/bash\n')
+                    f.write(hook.script)
+                    script_path = f.name
 
-                try:
-                    os.chmod(script_path, mode=0o755)
-                    await self._run_command(script_path, hook.timeout_secs)
-                finally:
                     try:
-                        os.unlink(script_path)
-                    except Exception as e:
-                        print(f'{e} occured')
+                        os.chmod(script_path, mode=0o755)
+                        await self._run_command(script_path, hook.timeout_secs, env)
+                    finally:
+                        try:
+                            os.unlink(script_path)
+                        except Exception as e:
+                            print(f'{e} occured')
+
+        except Exception as e:
+            print(f'Error running hook {hook.name}: {e}')
                 
 
     async def _run_command(self, command: str, timeout: float, env: dict[str, str]) -> None:
-        process = await asyncio.create_subprocess_exec(
+        process = await asyncio.create_subprocess_shell(
             command,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
@@ -79,7 +84,7 @@ class HookSystem:
             env['AI_AGENT_USER_MESSAGE'] = user_message
 
         if error:
-            env['AI_AGENT_ERROR'] = error
+            env['AI_AGENT_ERROR'] = str(error)
 
         return env      
  
@@ -104,7 +109,7 @@ class HookSystem:
     ) -> None:
         env = self._build_env(HookTrigger.BEFORE_TOOL, tool_name)
         env['AI_AGENT_TOOL_NAME'] = tool_name
-        env['AI_AGENT_TOOL_PARAMS'] = tool_params
+        env['AI_AGENT_TOOL_PARAMS'] = json.dumps(tool_params)
 
         for hook in self.hooks:
             if hook.trigger == HookTrigger.BEFORE_TOOL:
@@ -117,7 +122,7 @@ class HookSystem:
         tool_result: ToolResult,
     ) -> None:
         env = self._build_env(HookTrigger.AFTER_TOOL, tool_name)
-        env['AI_AGENT_TOOL_PARAMS'] = tool_params
+        env['AI_AGENT_TOOL_PARAMS'] = json.dumps(tool_params)
         env['AI_AGENT_TOOL_RESULT'] = tool_result.to_model_output()
 
         for hook in self.hooks:
