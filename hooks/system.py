@@ -89,14 +89,16 @@ class HookSystem:
         return env      
  
     async def trigger_before_agent(self, user_message: str) -> None:
-        env = self._build_env(HookTrigger.BEFORE_AGENT, user_message)
+        env = self._build_env(HookTrigger.BEFORE_AGENT, user_message=user_message)
         for hook in self.hooks:
             if hook.trigger == HookTrigger.BEFORE_AGENT:
                 await self._run_hook(hook, env)
 
     async def trigger_after_agent(self, user_message: str, agent_response: str) -> None:
-        env = self._build_env(HookTrigger.AFTER_AGENT, user_message)
-        env['AI_AGENT_RESPONSE'] = agent_response[:7500]
+        env = self._build_env(HookTrigger.AFTER_AGENT, user_message=user_message)
+
+        if agent_response is not None:
+            env['AI_AGENT_RESPONSE'] = agent_response[:7500]
 
         for hook in self.hooks:
             if hook.trigger == HookTrigger.AFTER_AGENT:
@@ -107,7 +109,7 @@ class HookSystem:
         tool_name: str,
         tool_params: dict[str, Any],
     ) -> None:
-        env = self._build_env(HookTrigger.BEFORE_TOOL, tool_name)
+        env = self._build_env(HookTrigger.BEFORE_TOOL, tool_name=tool_name)
         env['AI_AGENT_TOOL_NAME'] = tool_name
         env['AI_AGENT_TOOL_PARAMS'] = json.dumps(tool_params)
 
@@ -121,7 +123,7 @@ class HookSystem:
         tool_params: dict[str, Any],
         tool_result: ToolResult,
     ) -> None:
-        env = self._build_env(HookTrigger.AFTER_TOOL, tool_name)
+        env = self._build_env(HookTrigger.AFTER_TOOL, tool_name=tool_name)
         env['AI_AGENT_TOOL_PARAMS'] = json.dumps(tool_params)
         env['AI_AGENT_TOOL_RESULT'] = tool_result.to_model_output()
 
@@ -134,7 +136,7 @@ class HookSystem:
         self,
         error: Exception,
     ) -> None:
-        env = self._build_env(HookTrigger.ON_ERROR, error)
+        env = self._build_env(HookTrigger.ON_ERROR, error=error)
         env['AI_AGENT_ERROR'] = str(error)
 
         for hook in self.hooks:

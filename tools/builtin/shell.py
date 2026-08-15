@@ -71,7 +71,7 @@ class ShellTool(Tool):
                 tool_name=self.name,
                 params=invocation.params,
                 description=f'Execute -> {params.command}',
-                command=params.command,
+                cmd=params.command,
                 is_dangerous=False,
             )
     
