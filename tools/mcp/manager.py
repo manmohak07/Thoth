@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any
 
 from config.config import Config
 from tools.mcp.client import MCPClient, MCPServerStatus
@@ -63,6 +64,20 @@ class MCPManager():
 
         self._clients.clear()
         self._initialized = False
+
+    def get_all_servers(self) -> list[dict[str, Any]]:
+        servers = []
+
+        for name, client in self._clients.items():
+            server_info = {
+                'name': name,
+                'status': client.status.value,
+                'tools': len(client.tools),
+            }
+
+            servers.append(server_info)
+
+        return servers
 
 
             

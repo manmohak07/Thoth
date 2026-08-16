@@ -320,7 +320,7 @@ IMPORTANT: Structure your response EXACTLY as follows:
 Be extremely specific with file paths and function names. The goal is to allow seamless continuation without redoing any completed work."""
 
 
-def create_loop_breaker_prompt(loop_description: str) -> str:
+def loop_breaker_prompt(loop_description: str) -> str:
     return f"""
 [SYSTEM NOTICE: Loop Detected]
 

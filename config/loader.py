@@ -11,13 +11,6 @@ from utils.errors import ConfigError
 AGENT_MD_FILE = 'AGENT.md'
 CONFIG_FILE_NAME = 'config.toml'
 
-# User can have TWO TYPES OF CONFIGS
-# 1. A GENERIC config
-#   ~/.config/ai-agent/config.toml
-# 2. A PROJECT SPECIFIC config 
-#   Users/username/Desktop/project_name/.ai_agent/config.toml
-# The second one, i.e. the project specific config is prioritised and shall override the generic one.   
-
 def get_config_dir() -> Path:
     return Path(user_config_dir('ai-agent'))
 
