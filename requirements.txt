@@ -1,0 +1,26 @@
+# Core Dependencies
+pydantic
+click
+python-dotenv
+
+# LLM Client
+openai
+
+# Terminal UI
+rich
+
+# Configuration
+tomli; python_version < "3.11"
+platformdirs
+
+# Text Processing
+tiktoken
+
+# HTTP Clients (for web tools)
+httpx
+
+# Web Search (for web_search tool)
+duckduckgo-search
+
+# MCP Integration
+fastmcp
